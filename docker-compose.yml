@@ -1,0 +1,34 @@
+version: '3.8'
+services:
+  db:
+    image: mysql:8.0
+    environment:
+      MYSQL_ROOT_PASSWORD: root_pass
+      MYSQL_DATABASE: aqa_shop
+      MYSQL_USER: appuser
+      MYSQL_PASSWORD: password
+    ports:
+      - "3306:3306"
+    healthcheck:
+      test: ["CMD", "mysqladmin", "ping", "-h", "localhost"]
+      timeout: 20s
+      retries: 10
+
+  gate-simulator:
+    build: ./gate-simulator
+    ports:
+      - "9999:9999"
+
+  aqa-shop:
+    image: openjdk:17-jdk
+    working_dir: /app
+    volumes:
+      - .:/app
+    command: java -jar aqa-shop.jar
+    ports:
+      - "8080:8080"
+    depends_on:
+      db:
+        condition: service_healthy
+      gate-simulator:
+        condition: service_started
