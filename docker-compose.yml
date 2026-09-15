@@ -1,16 +1,17 @@
 version: '3.8'
+
 services:
   db:
     image: mysql:8.0
     environment:
       MYSQL_ROOT_PASSWORD: root_pass
-      MYSQL_DATABASE: aqa_shop
-      MYSQL_USER: appuser
-      MYSQL_PASSWORD: password
+      MYSQL_DATABASE: app
+      MYSQL_USER: app
+      MYSQL_PASSWORD: pass
     ports:
       - "3306:3306"
     healthcheck:
-      test: ["CMD", "mysqladmin", "ping", "-h", "localhost"]
+      test: ["CMD", "mysqladmin", "ping", "-h", "localhost", "-u", "root", "-proot_pass"]
       timeout: 20s
       retries: 10
 
@@ -23,8 +24,14 @@ services:
     image: openjdk:17-jdk
     working_dir: /app
     volumes:
-      - .:/app
-    command: java -jar aqa-shop.jar
+      - ./aqa-shop.jar:/app/aqa-shop.jar
+    command: >
+      java -jar aqa-shop.jar
+      --spring.datasource.url=jdbc:mysql://db:3306/app
+      --spring.datasource.username=app
+      --spring.datasource.password=pass
+      --spring.payment-gate.url=http://gate-simulator:9999/payment
+      --spring.credit-gate.url=http://gate-simulator:9999/credit
     ports:
       - "8080:8080"
     depends_on:
