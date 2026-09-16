@@ -9,46 +9,45 @@ from data.test_data import (
 
 def fill_and_submit(driver, card, month=VALID_MONTH, year=VALID_YEAR,
                     owner=VALID_OWNER, cvc=VALID_CVC):
-    main = MainPage(driver)
     payment = PaymentPage(driver)
     payment.fill_form(card, month, year, owner, cvc)
     payment.click_continue()
     return payment
 
 
-# --- Позитивные сценарии: оплата по карте ---
+# --- Позитивные: оплата по карте ---
 
 def test_buy_approved_card(driver):
     main = MainPage(driver)
     main.click_buy()
     payment = fill_and_submit(driver, APPROVED_CARD)
-    assert payment.is_success(), "Ожидается успешная оплата картой APPROVED"
+    assert payment.is_success(), "Ожидается успех по карте APPROVED"
 
 
 def test_buy_declined_card(driver):
     main = MainPage(driver)
     main.click_buy()
     payment = fill_and_submit(driver, DECLINED_CARD)
-    assert payment.is_error(), "Ожидается отказ банка по карте DECLINED"
+    assert payment.is_error(), "Ожидается отказ по карте DECLINED"
 
 
-# --- Позитивные сценарии: кредит ---
+# --- Позитивные: кредит ---
 
 def test_credit_approved_card(driver):
     main = MainPage(driver)
     main.click_credit()
     payment = fill_and_submit(driver, APPROVED_CARD)
-    assert payment.is_success(), "Ожидается успешное оформление кредита APPROVED"
+    assert payment.is_success(), "Ожидается успех кредита APPROVED"
 
 
 def test_credit_declined_card(driver):
     main = MainPage(driver)
     main.click_credit()
     payment = fill_and_submit(driver, DECLINED_CARD)
-    assert payment.is_error(), "Ожидается отказ банка по кредиту DECLINED"
+    assert payment.is_error(), "Ожидается отказ кредита DECLINED"
 
 
-# --- Негативные сценарии: валидация полей (оплата по карте) ---
+# --- Негативные: валидация номера карты ---
 
 @pytest.mark.parametrize("card, expected_error", [
     ("", "Поле обязательно для заполнения"),
@@ -64,6 +63,8 @@ def test_buy_invalid_card_number(driver, card, expected_error):
     assert payment.get_card_error() == expected_error
 
 
+# --- Негативные: валидация месяца ---
+
 @pytest.mark.parametrize("month, expected_error", [
     ("00", "Неверный формат"),
     ("13", "Неверно указан срок действия карты"),
@@ -77,6 +78,8 @@ def test_buy_invalid_month(driver, month, expected_error):
     payment.click_continue()
     assert payment.get_month_error() == expected_error
 
+
+# --- Негативные: валидация года ---
 
 @pytest.mark.parametrize("year, expected_error", [
     ("20", "Истёк срок действия карты"),
@@ -92,6 +95,8 @@ def test_buy_invalid_year(driver, year, expected_error):
     assert payment.get_year_error() == expected_error
 
 
+# --- Негативные: валидация владельца ---
+
 @pytest.mark.parametrize("owner, expected_error", [
     ("", "Поле обязательно для заполнения"),
     ("12345", "Неверный формат"),
@@ -105,6 +110,8 @@ def test_buy_invalid_owner(driver, owner, expected_error):
     payment.click_continue()
     assert payment.get_owner_error() == expected_error
 
+
+# --- Негативные: валидация CVC ---
 
 @pytest.mark.parametrize("cvc, expected_error", [
     ("", "Поле обязательно для заполнения"),
@@ -120,7 +127,7 @@ def test_buy_invalid_cvc(driver, cvc, expected_error):
     assert payment.get_cvc_error() == expected_error
 
 
-# --- Проверки БД ---
+# --- Проверки БД: оплата по карте ---
 
 def test_db_after_approved_payment(driver, clean_db, db_connection):
     main = MainPage(driver)
@@ -135,9 +142,9 @@ def test_db_after_approved_payment(driver, clean_db, db_connection):
     orders = cursor.fetchall()
     cursor.close()
 
-    assert len(payments) == 1, "Должна быть 1 запись в payment_entity"
+    assert len(payments) == 1
     assert payments[0]["status"] == "APPROVED"
-    assert len(orders) == 1, "Должна быть 1 запись в order_entity"
+    assert len(orders) == 1
     assert orders[0]["payment_id"] is not None
 
 
@@ -152,9 +159,11 @@ def test_db_after_declined_payment(driver, clean_db, db_connection):
     payments = cursor.fetchall()
     cursor.close()
 
-    assert len(payments) == 1, "Должна быть 1 запись в payment_entity"
+    assert len(payments) == 1
     assert payments[0]["status"] == "DECLINED"
 
+
+# --- Проверки БД: кредит ---
 
 def test_db_after_approved_credit(driver, clean_db, db_connection):
     main = MainPage(driver)
@@ -169,7 +178,7 @@ def test_db_after_approved_credit(driver, clean_db, db_connection):
     orders = cursor.fetchall()
     cursor.close()
 
-    assert len(credits) == 1, "Должна быть 1 запись в credit_request_entity"
+    assert len(credits) == 1
     assert credits[0]["status"] == "APPROVED"
     assert len(orders) == 1
 
@@ -185,5 +194,5 @@ def test_db_after_declined_credit(driver, clean_db, db_connection):
     credits = cursor.fetchall()
     cursor.close()
 
-    assert len(credits) == 1, "Должна быть 1 запись в credit_request_entity"
+    assert len(credits) == 1
     assert credits[0]["status"] == "DECLINED"

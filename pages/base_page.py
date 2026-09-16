@@ -25,9 +25,11 @@ class BasePage:
     def get_text(self, locator):
         return self.find_visible(locator).text
 
-    def is_element_present(self, locator):
+    def is_element_present(self, locator, timeout=3):
         try:
-            self.find_visible(locator)
+            WebDriverWait(self.driver, timeout).until(
+                EC.visibility_of_element_located(locator)
+            )
             return True
         except Exception:
             return False

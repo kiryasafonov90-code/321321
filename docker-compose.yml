@@ -25,6 +25,7 @@ services:
     working_dir: /app
     volumes:
       - ./aqa-shop.jar:/app/aqa-shop.jar
+      - ./application.properties:/app/application.properties
     command: >
       java -jar aqa-shop.jar
       --spring.datasource.url=jdbc:mysql://db:3306/app
@@ -39,3 +40,9 @@ services:
         condition: service_healthy
       gate-simulator:
         condition: service_started
+ENDOFFILEcat > requirements.txt << 'ENDOFFILE'
+pytest==7.4.3
+selenium==4.15.2
+allure-pytest==2.13.2
+mysql-connector-python==8.2.0
+faker==20.1.0
