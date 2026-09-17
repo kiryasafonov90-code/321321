@@ -9,7 +9,7 @@ services:
       MYSQL_USER: app
       MYSQL_PASSWORD: pass
     ports:
-      - "3306:3306"
+      - "3307:3306"
     healthcheck:
       test: ["CMD", "mysqladmin", "ping", "-h", "localhost", "-u", "root", "-proot_pass"]
       timeout: 20s
@@ -40,9 +40,3 @@ services:
         condition: service_healthy
       gate-simulator:
         condition: service_started
-ENDOFFILEcat > requirements.txt << 'ENDOFFILE'
-pytest==7.4.3
-selenium==4.15.2
-allure-pytest==2.13.2
-mysql-connector-python==8.2.0
-faker==20.1.0
