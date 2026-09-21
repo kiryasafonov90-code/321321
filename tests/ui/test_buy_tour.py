@@ -15,8 +15,6 @@ def fill_and_submit(driver, card, month=VALID_MONTH, year=VALID_YEAR,
     return payment
 
 
-# --- Позитивные: оплата по карте ---
-
 def test_buy_approved_card(driver):
     main = MainPage(driver)
     main.click_buy()
@@ -30,8 +28,6 @@ def test_buy_declined_card(driver):
     payment = fill_and_submit(driver, DECLINED_CARD)
     assert payment.is_error(), "Ожидается отказ по карте DECLINED"
 
-
-# --- Позитивные: кредит ---
 
 def test_credit_approved_card(driver):
     main = MainPage(driver)
@@ -47,8 +43,6 @@ def test_credit_declined_card(driver):
     assert payment.is_error(), "Ожидается отказ кредита DECLINED"
 
 
-# --- Негативные: валидация номера карты ---
-
 @pytest.mark.parametrize("card, expected_error", [
     ("", "Поле обязательно для заполнения"),
     ("0000 0000 0000 0000", "Неверный формат"),
@@ -62,8 +56,6 @@ def test_buy_invalid_card_number(driver, card, expected_error):
     payment.click_continue()
     assert payment.get_card_error() == expected_error
 
-
-# --- Негативные: валидация месяца ---
 
 @pytest.mark.parametrize("month, expected_error", [
     ("00", "Неверный формат"),
@@ -79,8 +71,6 @@ def test_buy_invalid_month(driver, month, expected_error):
     assert payment.get_month_error() == expected_error
 
 
-# --- Негативные: валидация года ---
-
 @pytest.mark.parametrize("year, expected_error", [
     ("20", "Истёк срок действия карты"),
     ("00", "Неверно указан срок действия карты"),
@@ -94,8 +84,6 @@ def test_buy_invalid_year(driver, year, expected_error):
     payment.click_continue()
     assert payment.get_year_error() == expected_error
 
-
-# --- Негативные: валидация владельца ---
 
 @pytest.mark.parametrize("owner, expected_error", [
     ("", "Поле обязательно для заполнения"),
@@ -111,8 +99,6 @@ def test_buy_invalid_owner(driver, owner, expected_error):
     assert payment.get_owner_error() == expected_error
 
 
-# --- Негативные: валидация CVC ---
-
 @pytest.mark.parametrize("cvc, expected_error", [
     ("", "Поле обязательно для заполнения"),
     ("1", "Неверный формат"),
@@ -126,8 +112,6 @@ def test_buy_invalid_cvc(driver, cvc, expected_error):
     payment.click_continue()
     assert payment.get_cvc_error() == expected_error
 
-
-# --- Проверки БД: оплата по карте ---
 
 def test_db_after_approved_payment(driver, clean_db, db_connection):
     main = MainPage(driver)
@@ -145,7 +129,7 @@ def test_db_after_approved_payment(driver, clean_db, db_connection):
     assert len(payments) == 1
     assert payments[0]["status"] == "APPROVED"
     assert len(orders) == 1
-    assert orders[0]["payment_id"] is not None
+    assert orders[0]["payment_id"] == payments[0]["id"]
 
 
 def test_db_after_declined_payment(driver, clean_db, db_connection):
@@ -163,8 +147,6 @@ def test_db_after_declined_payment(driver, clean_db, db_connection):
     assert payments[0]["status"] == "DECLINED"
 
 
-# --- Проверки БД: кредит ---
-
 def test_db_after_approved_credit(driver, clean_db, db_connection):
     main = MainPage(driver)
     main.click_credit()
@@ -181,6 +163,7 @@ def test_db_after_approved_credit(driver, clean_db, db_connection):
     assert len(credits) == 1
     assert credits[0]["status"] == "APPROVED"
     assert len(orders) == 1
+    assert orders[0]["credit_id"] == credits[0]["id"]
 
 
 def test_db_after_declined_credit(driver, clean_db, db_connection):

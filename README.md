@@ -6,54 +6,57 @@
 
 - Docker и Docker Compose
 - Python 3.11+
-- Google Chrome или Chromium
+- Google Chrome / Chromium
 - ChromeDriver, совместимый с браузером
-- Allure Commandline — для просмотра Allure-отчёта
+- Allure Commandline
 
-## Установка
+## Порты
+
+В проекте используется единый порт MySQL **3306**:
+- `docker-compose.yml`: `3306:3306`
+- `conftest.py`: `port=3306`
+- `application.properties`: `jdbc:mysql://localhost:3306/app`
+
+Приложение доступно на `http://localhost:8080`, gate-simulator — на `http://localhost:9999`.
+
+## Запуск
 
 ```bash
-git clone https://github.com/kiryasafonov90-code/321321.git
-cd 321321
-python3 -m venv venv
-source venv/bin/activate
-pip install -r requirements.txt
-```
-
-Windows:
-
-```powershell
 python -m venv venv
+
+# Linux/macOS
+source venv/bin/activate
+
+# Windows
 venv\Scripts\activate
+
 pip install -r requirements.txt
-```
 
-## Запуск приложения
-
-```bash
 docker-compose up -d
-```
-
-Приложение: `http://localhost:8080`
-
-## Запуск автотестов
-
-```bash
 pytest tests/ui/ -v --alluredir=allure-results
-```
-
-## Allure
-
-```bash
 allure serve allure-results
 ```
 
-## Остановка
+После завершения:
 
 ```bash
 docker-compose down
 ```
 
-## Важно
+## Структура
 
-Фактические результаты тестового прогона и подтверждённые дефекты должны заноситься в `Report.md` только после реального запуска тестов.
+- `conftest.py` — фикстуры Selenium и MySQL
+- `docker-compose.yml` — MySQL + gate-simulator + aqa-shop
+- `application.properties` — настройки приложения
+- `aqa-shop.jar` — тестируемое приложение
+- `gate-simulator/` — эмулятор платёжного шлюза
+- `pages/` — Page Object Model
+- `data/` — тестовые данные
+- `tests/ui/` — UI и DB автотесты
+- `Plan.md` — план тестирования
+- `Report.md` — фактический отчёт о прогоне
+- `Summary.md` — итоговый статус проекта
+
+## Результаты
+
+Фактические `passed/failed`, скриншоты Allure и подтверждённые дефекты должны быть внесены после реального запуска команд из раздела «Запуск». Результаты заранее не подставляются.

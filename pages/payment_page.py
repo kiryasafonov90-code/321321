@@ -3,7 +3,6 @@ from pages.base_page import BasePage
 
 
 class PaymentPage(BasePage):
-    # Поля формы
     CARD_NUMBER = (By.CSS_SELECTOR, 'input[placeholder="0000 0000 0000 0000"]')
     MONTH = (By.CSS_SELECTOR, 'input[placeholder="08"]')
     YEAR = (By.CSS_SELECTOR, 'input[placeholder="22"]')
@@ -11,31 +10,16 @@ class PaymentPage(BasePage):
     CVC = (By.CSS_SELECTOR, 'input[placeholder="999"]')
     CONTINUE_BUTTON = (By.CSS_SELECTOR, 'button.button')
 
-    # Уведомления
     SUCCESS_NOTIFICATION = (By.CSS_SELECTOR, '.notification_status_ok')
     ERROR_NOTIFICATION = (By.CSS_SELECTOR, '.notification_status_error')
 
-    # Сообщения об ошибках валидации (.input__sub под каждым полем)
-    CARD_NUMBER_ERROR = (
-        By.XPATH,
-        '//span[text()="Номер карты"]/following-sibling::span[@class="input__sub"]'
-    )
-    MONTH_ERROR = (
-        By.XPATH,
-        '//span[text()="Месяц"]/following-sibling::span[@class="input__sub"]'
-    )
-    YEAR_ERROR = (
-        By.XPATH,
-        '//span[text()="Год"]/following-sibling::span[@class="input__sub"]'
-    )
-    OWNER_ERROR = (
-        By.XPATH,
-        '//span[text()="Владелец"]/following-sibling::span[@class="input__sub"]'
-    )
-    CVC_ERROR = (
-        By.XPATH,
-        '//span[text()="CVC/CVV"]/following-sibling::span[@class="input__sub"]'
-    )
+    def _field_error(self, field_name):
+        return (
+            By.XPATH,
+            f'//*[self::span or self::label][normalize-space()="{field_name}"]'
+            f'/ancestor::*[contains(concat(" ", normalize-space(@class), " "), " input ")][1]'
+            f'//*[contains(concat(" ", normalize-space(@class), " "), " input__sub ")]'
+        )
 
     def fill_form(self, card_number, month, year, owner, cvc):
         self.type_text(self.CARD_NUMBER, card_number)
@@ -54,16 +38,16 @@ class PaymentPage(BasePage):
         return self.is_element_present(self.ERROR_NOTIFICATION)
 
     def get_card_error(self):
-        return self.get_text(self.CARD_NUMBER_ERROR)
+        return self.get_text(self._field_error("Номер карты"))
 
     def get_month_error(self):
-        return self.get_text(self.MONTH_ERROR)
+        return self.get_text(self._field_error("Месяц"))
 
     def get_year_error(self):
-        return self.get_text(self.YEAR_ERROR)
+        return self.get_text(self._field_error("Год"))
 
     def get_owner_error(self):
-        return self.get_text(self.OWNER_ERROR)
+        return self.get_text(self._field_error("Владелец"))
 
     def get_cvc_error(self):
-        return self.get_text(self.CVC_ERROR)
+        return self.get_text(self._field_error("CVC/CVV"))

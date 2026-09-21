@@ -23,7 +23,7 @@ def driver():
 def db_connection():
     conn = mysql.connector.connect(
         host="localhost",
-        port=3307,
+        port=3306,
         user="app",
         password="pass",
         database="app"
