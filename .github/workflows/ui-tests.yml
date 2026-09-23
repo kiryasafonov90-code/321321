@@ -1,0 +1,69 @@
+name: UI tests
+
+on:
+  push:
+    branches: [main]
+  workflow_dispatch:
+
+jobs:
+  ui-tests:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+
+      - name: Install test dependencies
+        run: pip install -r requirements.txt
+
+      - name: Start application stack
+        run: |
+          printf '#!/bin/sh\nexec docker compose "$@"\n' | sudo tee /usr/local/bin/docker-compose >/dev/null
+          sudo chmod +x /usr/local/bin/docker-compose
+          docker-compose up -d
+          for i in $(seq 1 60); do
+            if curl -fsS http://localhost:8080 >/dev/null 2>&1; then
+              break
+            fi
+            sleep 2
+          done
+          curl -fsS http://localhost:8080 >/dev/null
+
+      - name: Run pytest
+        id: pytest
+        shell: bash
+        run: |
+          set +e
+          pytest tests/ui/ -v --alluredir=allure-results 2>&1 | tee pytest-output.txt
+          status=${PIPESTATUS[0]}
+          echo "exit_code=$status" >> "$GITHUB_OUTPUT"
+          exit $status
+
+      - name: Generate Allure report and screenshot
+        if: always()
+        shell: bash
+        run: |
+          npx --yes allure-commandline@2.36.0 generate allure-results -o allure-report --clean || true
+          if command -v google-chrome >/dev/null 2>&1 && [ -f allure-report/index.html ]; then
+            google-chrome --headless --no-sandbox --disable-gpu --window-size=1920,1080 --screenshot=allure-screenshot.png "file://$PWD/allure-report/index.html" || true
+          fi
+
+      - name: Upload test artifacts
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: ui-test-results
+          path: |
+            pytest-output.txt
+            allure-results/
+            allure-report/
+            allure-screenshot.png
+          if-no-files-found: warn
+
+      - name: Stop application stack
+        if: always()
+        run: docker-compose down
