@@ -3,8 +3,8 @@ from pages.base_page import BasePage
 
 
 class MainPage(BasePage):
-    BUY_BUTTON = (By.XPATH, "//button[text()='Купить']")
-    CREDIT_BUTTON = (By.XPATH, "//button[text()='Купить в кредит']")
+    BUY_BUTTON = (By.XPATH, "//button[normalize-space(.)='Купить']")
+    CREDIT_BUTTON = (By.XPATH, "//button[normalize-space(.)='Купить в кредит']")
 
     def click_buy(self):
         self.click(self.BUY_BUTTON)
