@@ -32,7 +32,7 @@ venv\Scripts\activate
 
 pip install -r requirements.txt
 
-docker-compose up -d
+docker compose up -d
 pytest tests/ui/ -v --alluredir=allure-results
 allure serve allure-results
 ```
@@ -40,7 +40,7 @@ allure serve allure-results
 После завершения:
 
 ```bash
-docker-compose down
+docker compose down
 ```
 
 ## Структура
