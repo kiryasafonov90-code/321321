@@ -22,9 +22,7 @@ jobs:
 
       - name: Start application stack
         run: |
-          printf '#!/bin/sh\nexec docker compose "$@"\n' | sudo tee /usr/local/bin/docker-compose >/dev/null
-          sudo chmod +x /usr/local/bin/docker-compose
-          docker-compose up -d
+          docker compose up -d
           for i in $(seq 1 60); do
             if curl -fsS http://localhost:8080 >/dev/null 2>&1; then
               break
@@ -66,4 +64,4 @@ jobs:
 
       - name: Stop application stack
         if: always()
-        run: docker-compose down
+        run: docker compose down

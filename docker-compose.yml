@@ -19,7 +19,7 @@ services:
       - "9999:9999"
 
   aqa-shop:
-    image: openjdk:17-jdk
+    image: eclipse-temurin:17-jdk
     working_dir: /app
     volumes:
       - ./aqa-shop.jar:/app/aqa-shop.jar
