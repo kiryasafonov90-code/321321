@@ -6,7 +6,7 @@ class PaymentPage(BasePage):
     CARD_NUMBER = (By.CSS_SELECTOR, 'input[placeholder="0000 0000 0000 0000"]')
     MONTH = (By.CSS_SELECTOR, 'input[placeholder="08"]')
     YEAR = (By.CSS_SELECTOR, 'input[placeholder="22"]')
-    OWNER = (By.CSS_SELECTOR, 'input[placeholder="Ivanov Ivan"]')
+    OWNER = (By.CSS_SELECTOR, 'input[placeholder="Ivan Ivanov"]')
     CVC = (By.CSS_SELECTOR, 'input[placeholder="999"]')
     CONTINUE_BUTTON = (By.CSS_SELECTOR, 'button.button')
 
