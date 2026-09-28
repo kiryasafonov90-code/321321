@@ -37,7 +37,7 @@
 ## Команда запуска
 
 ```bash
-docker-compose up -d
+docker compose up -d
 pytest tests/ui/ -v --alluredir=allure-results
 allure serve allure-results
 ```
