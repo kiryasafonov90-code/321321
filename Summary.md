@@ -15,7 +15,7 @@
 Фактические цифры пока **не заполняются без реального запуска**. После запуска:
 
 ```bash
-docker-compose up -d
+docker compose up -d
 pytest tests/ui/ -v --alluredir=allure-results
 allure serve allure-results
 ```
