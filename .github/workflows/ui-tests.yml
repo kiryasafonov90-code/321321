@@ -29,7 +29,9 @@ jobs:
             fi
             sleep 2
           done
-          curl -fsS http://localhost:8080 >/dev/null
+          curl -fsS http://localhost:8080 > homepage.html
+          grep -q 'Купить' homepage.html
+          grep -q 'Купить в кредит' homepage.html
 
       - name: Run pytest
         id: pytest
@@ -56,6 +58,7 @@ jobs:
         with:
           name: ui-test-results
           path: |
+            homepage.html
             pytest-output.txt
             allure-results/
             allure-report/
