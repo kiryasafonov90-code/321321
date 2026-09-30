@@ -30,8 +30,37 @@ jobs:
             sleep 2
           done
           curl -fsS http://localhost:8080 > homepage.html
-          grep -q 'Купить' homepage.html
-          grep -q 'Купить в кредит' homepage.html
+          grep -q '<title>AQA: Заявка на карту</title>' homepage.html
+
+      - name: Smoke-check main page buttons
+        run: |
+          python - <<'PY'
+          from selenium import webdriver
+          from selenium.webdriver.chrome.options import Options
+          from selenium.webdriver.common.by import By
+          from selenium.webdriver.support.ui import WebDriverWait
+          from selenium.webdriver.support import expected_conditions as EC
+
+          options = Options()
+          options.add_argument("--headless=new")
+          options.add_argument("--no-sandbox")
+          options.add_argument("--disable-dev-shm-usage")
+          options.add_argument("--window-size=1920,1080")
+
+          driver = webdriver.Chrome(options=options)
+          try:
+              driver.get("http://localhost:8080")
+              wait = WebDriverWait(driver, 15)
+              wait.until(EC.element_to_be_clickable(
+                  (By.XPATH, "//button[normalize-space(.)='Купить']")
+              ))
+              wait.until(EC.element_to_be_clickable(
+                  (By.XPATH, "//button[normalize-space(.)='Купить в кредит']")
+              ))
+              print("Main page buttons are present and clickable.")
+          finally:
+              driver.quit()
+          PY
 
       - name: Run pytest
         id: pytest
